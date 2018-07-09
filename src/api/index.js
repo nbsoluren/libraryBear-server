@@ -25,14 +25,6 @@ export default ({ config, db }) => {
 					return library.searchBooksByAuthor(db, req, res);
 				case 'search-books-by-category':
 					return library.searchBooksByCategory(db, req, res);
-				case 'search-books-by-title':
-					return library.searchBooksByTitle(db, req, res);
-				case 'show-all-books':
-					return library.showAllBooks(db, req, res);
-				case 'show-all-available-books':
-					return library.showAllAvailableBooks(db, req, res);
-				case 'show-borrowed-books':
-					return library.showBorrowedBooks(db, req, res);
 
 				default:
 					return res.json({ fulfillmentText: 'There is an error 👾' });
