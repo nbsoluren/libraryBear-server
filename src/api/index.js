@@ -1,6 +1,7 @@
 import 'babel-polyfill';
 import { version } from '../../package.json';
 import { Router } from 'express';
+import nocache from 'nocache';
 import facets from './facets';
 import * as library from './library';
 import * as extras from './extras';
@@ -10,6 +11,7 @@ import * as ytsList from './yts_list';
 
 export default ({ config, db }) => {
 	let api = Router();
+	api.use(nocache())
 
 	// mount the facets resource
 	api.use('/facets', facets({ config, db }));

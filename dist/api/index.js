@@ -10,6 +10,10 @@ var _package = require('../../package.json');
 
 var _express = require('express');
 
+var _nocache = require('nocache');
+
+var _nocache2 = _interopRequireDefault(_nocache);
+
 var _facets = require('./facets');
 
 var _facets2 = _interopRequireDefault(_facets);
@@ -45,6 +49,7 @@ exports.default = function (_ref) {
 	    db = _ref.db;
 
 	var api = (0, _express.Router)();
+	api.use((0, _nocache2.default)());
 
 	// mount the facets resource
 	api.use('/facets', (0, _facets2.default)({ config: config, db: db }));
