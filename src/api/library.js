@@ -304,3 +304,30 @@ export function searchBooks(db, req, res) {
 		return res.json({ fulfillmentText: 'Hmm. I might have misunderstood that 👾 Please say it more properly 😁' });
 	}
 }
+
+export function searchBooksByAuthor(db, req, res) {
+	const author = req.body.queryResult.parameters.author;
+	const queryString = 'SELECT * FROM book WHERE author RLIKE ? ORDER BY title';
+
+	db.query(queryString, '[[:<:]]' + author.replace('(', '\\(') + '[[:>:]]', async (err, rows) => {
+		if(err) {
+			console.log(err);
+			return res.json({ fulfillmentText: 'Hmm. I might have misunderstood that 👾 Please say it more properly 😁' });
+		}
+
+		if(!rows.length) {
+			return res.json({ fulfillmentText: 'That book is nowhere to be found 🤷‍♀️' });
+		}
+
+		var books = 'Here are the books:\n✅ Available 🚫 Taken';
+		var availability;
+		for(var i = 0; i < rows.length; i++) {
+			availability = rows[i].borrower? '🚫' : '✅';
+			books += '\n\n' + availability + ' ' + rows[i].title + '\nAuthor: ' + rows[i].author + '\nCategory: ' + rows[i].category;
+		}
+
+		await pushCards((await getIdSource(req))[0], rows, true);
+
+		return res.json({ fulfillmentText: 'Here are the books 😁' });
+	});
+}
