@@ -35,6 +35,24 @@ export default ({ config, db }) => {
 					return library.showAllAvailableBooks(db, req, res);
 				case 'show-borrowed-books':
 					return library.showBorrowedBooks(db, req, res);
+				case 'act-like-animal':
+					return extras.actLikeAnimal(db, req, res);
+					// case 'notify-user-return-book':
+					// return library.notifyUserReturnBook(db, req, res);
+				case 'weather':
+					return weather.weather(db, req, res);
+				case 'temperature':
+					return weather.temperature(db, req, res);
+				case 'datetime':
+					return worldTime.datetime(db, req, res);
+				case 'list-yts-movies':
+					return ytsList.listYtsMovies(db, req, res);
+				case 'search-yts-movies':
+					return ytsList.searchYtsMovies(db, req, res);
+				case 'borrow-book':			
+					return library.borrowBook(db, req, res);
+				case 'return-book':	
+					return library.returnBook(db, req, res);
 
 				default:
 					return res.json({ fulfillmentText: 'There is an error 👾rstrst' });
