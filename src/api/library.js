@@ -437,3 +437,28 @@ export function showAllAvailableBooks(db, req, res) {
 		return res.json({ fulfillmentText: 'Here are the available books 😁' });
 	});
 }
+
+export async function showBorrowedBooks(db, req, res) {
+	const id = (await getIdSource(req))[0];
+	const queryString = 'SELECT * FROM book WHERE borrower = ? ORDER BY title';
+
+	db.query(queryString, id, async (err, rows) => {
+		if(err) {
+			console.log(err);
+			return res.json({ fulfillmentText: 'Hmm. I might have misunderstood that 👾 Please say it more properly 😁' });
+		}
+
+		if(!rows.length) {
+			return res.json({ fulfillmentText: 'You didn\'t borrow any book 🤷‍️' });
+		}
+
+		var books = 'Here are your borrowed books:';
+		for(var i = 0; i < rows.length; i++) {
+			books += '\n\n' + rows[i].title + '\nAuthor: ' + rows[i].author + '\nCategory: ' + rows[i].category;
+		}
+
+		await pushCards((await getIdSource(req))[0], rows);
+		
+		return res.json({ fulfillmentText: 'Here are your borrowed books 😁' });
+	});
+}
