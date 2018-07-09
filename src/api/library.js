@@ -359,3 +359,81 @@ export function searchBooksByCategory(db, req, res) {
 		return res.json({ fulfillmentText: 'Here are the books 😁' });
 	});
 }
+
+
+export function searchBooksByTitle(db, req, res) {
+	const title = req.body.queryResult.parameters.title;
+	const queryString = 'SELECT * FROM book WHERE title RLIKE ? ORDER BY title';
+
+	db.query(queryString, '[[:<:]]' + title.replace('(', '\\(') + '[[:>:]]', async (err, rows) => {
+		if(err) {
+			console.log(err);
+			return res.json({ fulfillmentText: 'Hmm. I might have misunderstood that 👾 Please say it more properly 😁' });
+		}
+
+		if(!rows.length) {
+			return res.json({ fulfillmentText: 'That book is nowhere to be found 🤷‍♀️' });
+		}
+
+		var books = 'Here are the books:\n✅ Available 🚫 Taken';
+		var availability;
+		for(var i = 0; i < rows.length; i++) {
+			availability = rows[i].borrower? '🚫' : '✅';
+			books += '\n\n' + availability + ' ' + rows[i].title + '\nAuthor: ' + rows[i].author + '\nCategory: ' + rows[i].category;
+		}
+
+		await pushCards((await getIdSource(req))[0], rows, true);
+
+		return res.json({ fulfillmentText: 'Here are the books 😁' });
+	});
+}
+
+export function showAllBooks(db, req, res) {
+	const queryString = 'SELECT * FROM book ORDER BY title';
+
+	db.query(queryString, async (err, rows) => {
+		if(err) {
+			console.log(err);
+			return res.json({ fulfillmentText: 'Hmm. I might have misunderstood that 👾 Please say it more properly 😁' });
+		}
+
+		if(!rows.length) {
+			return res.json({ fulfillmentText: 'There are currently no books 🤷‍️' });
+		}
+
+		var books = 'Here are the books:\n✅ Available 🚫 Taken';
+		var availability;
+		for(var i = 0; i < rows.length; i++) {
+			availability = rows[i].borrower? '🚫' : '✅';
+			books += '\n\n' + availability + ' ' + rows[i].title + '\nAuthor: ' + rows[i].author + '\nCategory: ' + rows[i].category;
+		}
+
+		await pushCards((await getIdSource(req))[0], rows, true);
+
+		return res.json({ fulfillmentText: 'Here are all the books 😁' });
+	});
+}
+
+export function showAllAvailableBooks(db, req, res) {
+	const queryString = 'SELECT * FROM book WHERE borrower IS NULL ORDER BY title';
+
+	db.query(queryString, async (err, rows) => {
+		if(err) {
+			console.log(err);
+			return res.json({ fulfillmentText: 'Hmm. I might have misunderstood that 👾 Please say it more properly 😁' });
+		}
+
+		if(!rows.length) {
+			return res.json({ fulfillmentText: 'There are currently no available books 🤷‍️' });
+		}
+
+		var books = 'Here are the available books:';
+		for(var i = 0; i < rows.length; i++) {
+			books += '\n\n' + rows[i].title + '\nAuthor: ' + rows[i].author + '\nCategory: ' + rows[i].category;
+		}
+
+		await pushCards((await getIdSource(req))[0], rows);
+
+		return res.json({ fulfillmentText: 'Here are the available books 😁' });
+	});
+}
