@@ -2,6 +2,7 @@ import fetch from 'node-fetch';
 import moment from 'moment-timezone';
 
 export async function datetime(db, req, res) {
+    console.log("called");
     const location = req.body.queryResult.parameters.address != ''? req.body.queryResult.parameters.address : 'Manila';
     const key = 'AIzaSyC1-DXL2WaJO-PVishqsTQVI5ClY_OBfL8';
 

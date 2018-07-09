@@ -26,11 +26,11 @@ var returnBook = exports.returnBook = function () {
 						db.query(queryString, values, function (err, rows) {
 							if (err) {
 								console.log(err);
-								return res.json({ fulfillmentText: 'Hmm. I might have misunderstood that ���� Please say it more properly ����' });
+								return res.json({ fulfillmentText: 'We will get back to you on this.' });
 							}
 
 							if (!rows.length) {
-								return res.json({ fulfillmentText: 'But you don\'t have that book ����' });
+								return res.json({ fulfillmentText: 'You can\'t return a book you didn\'t borrow. 😡' });
 							}
 
 							queryString = 'UPDATE book SET borrower = null WHERE id = ? ORDER BY title LIMIT 1';
@@ -38,11 +38,11 @@ var returnBook = exports.returnBook = function () {
 							db.query(queryString, rows[0].id, function (err, rows1) {
 								if (err) {
 									console.log(err);
-									return res.json({ fulfillmentText: 'Hmm. I might have misunderstood that ���� Please say it more properly ����' });
+									return res.json({ fulfillmentText: 'Internal Error, We will get back to you on this.' });
 								}
 
 								return res.json(createFulfillmentSuggestions({
-									text: 'Thank you for returning ' + rows[0].title + '! ����',
+									text: 'Succesfully returned' + rows[0].title + '. 🤗',
 									suggestions: ['Borrow another book', 'Show borrowed books']
 								}));
 							});
@@ -91,7 +91,7 @@ var showBorrowedBooks = exports.showBorrowedBooks = function () {
 												}
 
 												console.log(err);
-												return _context10.abrupt('return', res.json({ fulfillmentText: 'Hmm. I might have misunderstood that ���� Please say it more properly ����' }));
+												return _context10.abrupt('return', res.json({ fulfillmentText: 'Hmm. I might have misunderstood that 👾 Please say it more properly 😁' }));
 
 											case 3:
 												if (rows.length) {
@@ -99,7 +99,7 @@ var showBorrowedBooks = exports.showBorrowedBooks = function () {
 													break;
 												}
 
-												return _context10.abrupt('return', res.json({ fulfillmentText: 'You didn\'t borrow any book ����������' }));
+												return _context10.abrupt('return', res.json({ fulfillmentText: 'You didn\'t borrow any book 🤷‍️' }));
 
 											case 5:
 												books = 'Here are your borrowed books:';
@@ -119,7 +119,7 @@ var showBorrowedBooks = exports.showBorrowedBooks = function () {
 												return (0, _context10.t0)(_context10.t1, _context10.t2);
 
 											case 14:
-												return _context10.abrupt('return', res.json({ fulfillmentText: 'Here are your borrowed books ����' }));
+												return _context10.abrupt('return', res.json({ fulfillmentText: 'Here are your borrowed books 😁' }));
 
 											case 15:
 											case 'end':
@@ -148,7 +148,6 @@ var showBorrowedBooks = exports.showBorrowedBooks = function () {
 }();
 
 exports.checkUser = checkUser;
-exports.notifyUserReturnBook = notifyUserReturnBook;
 exports.borrowBook = borrowBook;
 exports.searchBooks = searchBooks;
 exports.searchBooksByAuthor = searchBooksByAuthor;
@@ -156,6 +155,7 @@ exports.searchBooksByCategory = searchBooksByCategory;
 exports.searchBooksByTitle = searchBooksByTitle;
 exports.showAllBooks = showAllBooks;
 exports.showAllAvailableBooks = showAllAvailableBooks;
+exports.getStarted = getStarted;
 
 var _nodeFetch = require('node-fetch');
 
@@ -167,7 +167,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 function pushNotif(id, payload) {
 	var url = 'https://graph.facebook.com/v2.6/me/messages?access_token=';
-	var pageAccessToken = 'EAAdaLXIFrz8BAJESmV0LhUwhFUULv6o8trw2azU3cG5O6EjvKRmMZCNvpZCiIwqraghe6LCQ2iDAcirRvxcRBkY5ZBM2mnCUa9narZBcL6iM97vXHYOcqPuEQXgZAL0CP2EvXbQ7TdeKeS0tSZAXWP6XsxCVwZA2SvDXlZCYyx6YZAaMJq8gUZAqzP';
+	var pageAccessToken = 'EAAdaLXIFrz8BAGIEoSrTE95KQuYZAXKdOKGZCSQgPFNt0UE3GX31ZBK5NZAnyRZA0r3f576b4NOtFcZBBZCzJWOZBlZANeb6iv1q5ZB7A9Txl1DRYHqZBZCZAykElP6DhXktH0SQu5opFtmo6FKz6PBZAAebub40oMB4NOUXvME2UcQEuTolOEJUdQSs2z';
 
 	(0, _nodeFetch2.default)(url + pageAccessToken, {
 		headers: { 'Content-Type': 'application/json' },
@@ -407,7 +407,7 @@ function checkUser(db, req, res) {
 									return reject();
 								} else {
 									if (!rows.length) {
-										queryString = 'INSERT INTO user VALUES (?, ?, NOW())';
+										queryString = 'INSERT INTO user(id,source,prev_transac) VALUES (?, ?, NOW())';
 										var values = [id, source];
 
 										db.query(queryString, values, function (err, rows) {
@@ -447,12 +447,12 @@ function checkUser(db, req, res) {
 	}());
 }
 
-function notifyUserReturnBook(db, req, res) {
-	var params = req.body.queryResult.outputContexts[0].parameters;
-	var notification = 'Another person wants to borrow the book ' + params.bookTitle + ', please return it immediately after use ����\n\nThank you! ����';
-	pushQuickReplies(params.id, notification, ['Return ' + params.bookTitle]);
-	return res.json({ fulfillmentText: 'The borrower has now been notified ��������' });
-}
+// export function notifyUserReturnBook(db, req, res) {
+// 	const params = req.body.queryResult.outputContexts[0].parameters;
+// 	const notification = 'Another person wants to borrow the book ' + params.bookTitle + ', please return it immediately after use 📖\n\nThank you! 😁';
+// 	pushQuickReplies(params.id, notification, ['Return ' + params.bookTitle]);
+// 	return res.json({ fulfillmentText: 'The borrower has now been notified 🔔😁' });
+// }
 
 function borrowBook(db, req, res) {
 	var _this2 = this;
@@ -462,7 +462,7 @@ function borrowBook(db, req, res) {
 
 	db.query(queryString, '[[:<:]]' + params.title.replace('(', '\\(') + '[[:>:]]', function () {
 		var _ref4 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(err, rows) {
-			var userData, data, values;
+			var data, values;
 			return regeneratorRuntime.wrap(function _callee2$(_context2) {
 				while (1) {
 					switch (_context2.prev = _context2.next) {
@@ -473,7 +473,7 @@ function borrowBook(db, req, res) {
 							}
 
 							console.log(err);
-							return _context2.abrupt('return', res.json({ fulfillmentText: 'Hmm. I might have misunderstood that ���� Please say it more properly ����' }));
+							return _context2.abrupt('return', res.json({ fulfillmentText: 'We will get back to you on this.' }));
 
 						case 3:
 							if (rows.length) {
@@ -481,54 +481,23 @@ function borrowBook(db, req, res) {
 								break;
 							}
 
-							return _context2.abrupt('return', res.json({ fulfillmentText: 'Can\'t find that book in the library �������������' }));
+							return _context2.abrupt('return', res.json({ fulfillmentText: 'Sorry we currently dont have that book in the library. 😖' }));
 
 						case 5:
 							if (!rows[0].borrower) {
-								_context2.next = 18;
+								_context2.next = 9;
 								break;
 							}
 
-							_context2.next = 8;
-							return getIdSource(req);
+							return _context2.abrupt('return', res.json({ fulfillmentText: 'Someone is currently borrowing that book, Sorry 😰' }));
 
-						case 8:
-							userData = _context2.sent;
-							_context2.next = 11;
-							return checkFacebookUserId(db, userData[0], rows[0].borrower);
-
-						case 11:
-							if (!_context2.sent) {
-								_context2.next = 15;
-								break;
-							}
-
-							return _context2.abrupt('return', res.json({
-								fulfillmentText: 'That book has already been borrowed ������ Would you like to notify the person to return it? ����',
-								outputContexts: [{
-									name: req.body.session + '/contexts/libraryborrow-book-followup',
-									lifespanCount: 1,
-									parameters: {
-										id: rows[0].borrower,
-										bookTitle: rows[0].title
-									}
-								}]
-							}));
-
-						case 15:
-							return _context2.abrupt('return', res.json({ fulfillmentText: 'That book has already been borrowed ������' }));
-
-						case 16:
-							_context2.next = 24;
-							break;
-
-						case 18:
+						case 9:
 
 							queryString = 'UPDATE book SET borrower = ? WHERE title RLIKE ? ORDER BY title LIMIT 1';
-							_context2.next = 21;
+							_context2.next = 12;
 							return getIdSource(req);
 
-						case 21:
+						case 12:
 							data = _context2.sent;
 							values = [data[0], '[[:<:]]' + params.title.replace('(', '\\(') + '[[:>:]]'];
 
@@ -536,11 +505,11 @@ function borrowBook(db, req, res) {
 							db.query(queryString, values, function (err, rows1) {
 								if (err) {
 									console.log(err);
-									return res.json({ fulfillmentText: 'Hmm. I might have misunderstood that ���� Please say it more properly ����' });
+									return res.json({ fulfillmentText: 'We will get back to you on this.' });
 								}
 
 								return res.json(createFulfillmentCardSuggestions({
-									text: 'Here\'s your book! ����',
+									text: 'You\'ve succesfully borrowed a book!',
 									imageUri: rows[0].image,
 									title: rows[0].title + ' by ' + rows[0].author,
 									subtitle: rows[0].category,
@@ -548,7 +517,7 @@ function borrowBook(db, req, res) {
 								}));
 							});
 
-						case 24:
+						case 15:
 						case 'end':
 							return _context2.stop();
 					}
@@ -600,7 +569,7 @@ function searchBooks(db, req, res) {
 								}
 
 								console.log(err);
-								return _context4.abrupt('return', res.json({ fulfillmentText: 'Hmm. I might have misunderstood that ���� Please say it more properly ����' }));
+								return _context4.abrupt('return', res.json({ fulfillmentText: 'Hmm. I might have misunderstood that 👾 Please say it more properly 😁' }));
 
 							case 3:
 								if (rows.length) {
@@ -608,13 +577,13 @@ function searchBooks(db, req, res) {
 									break;
 								}
 
-								return _context4.abrupt('return', res.json({ fulfillmentText: 'That book is nowhere to be found �������������' }));
+								return _context4.abrupt('return', res.json({ fulfillmentText: 'That book is nowhere to be found 🤷‍♀️' }));
 
 							case 5:
-								books = 'Here are the books:\n��� Available ���� Taken';
+								books = 'Here are the books:\n✅ Available 🚫 Taken';
 
 								for (i = 0; i < rows.length; i++) {
-									availability = rows[i].borrower ? '����' : '���';
+									availability = rows[i].borrower ? '🚫' : '✅';
 									books += '\n\n' + availability + ' ' + rows[i].title + '\nAuthor: ' + rows[i].author + '\nCategory: ' + rows[i].category;
 								}
 
@@ -629,7 +598,7 @@ function searchBooks(db, req, res) {
 								return (0, _context4.t0)(_context4.t1, _context4.t2, true);
 
 							case 14:
-								return _context4.abrupt('return', res.json({ fulfillmentText: 'Here are the books ����' }));
+								return _context4.abrupt('return', res.json({ fulfillmentText: 'Here are the books 😁' }));
 
 							case 15:
 							case 'end':
@@ -644,7 +613,7 @@ function searchBooks(db, req, res) {
 			};
 		}());
 	} else {
-		return res.json({ fulfillmentText: 'Hmm. I might have misunderstood that ���� Please say it more properly ����' });
+		return res.json({ fulfillmentText: 'Hmm. I might have misunderstood that 👾 Please say it more properly 😁' });
 	}
 }
 
@@ -667,7 +636,7 @@ function searchBooksByAuthor(db, req, res) {
 							}
 
 							console.log(err);
-							return _context5.abrupt('return', res.json({ fulfillmentText: 'Hmm. I might have misunderstood that ���� Please say it more properly ����' }));
+							return _context5.abrupt('return', res.json({ fulfillmentText: 'Hmm. I might have misunderstood that 👾 Please say it more properly 😁' }));
 
 						case 3:
 							if (rows.length) {
@@ -675,13 +644,13 @@ function searchBooksByAuthor(db, req, res) {
 								break;
 							}
 
-							return _context5.abrupt('return', res.json({ fulfillmentText: 'That book is nowhere to be found �������������' }));
+							return _context5.abrupt('return', res.json({ fulfillmentText: 'That book is nowhere to be found 🤷‍♀️' }));
 
 						case 5:
-							books = 'Here are the books:\n��� Available ���� Taken';
+							books = 'Here are the books:\n✅ Available 🚫 Taken';
 
 							for (i = 0; i < rows.length; i++) {
-								availability = rows[i].borrower ? '����' : '���';
+								availability = rows[i].borrower ? '🚫' : '✅';
 								books += '\n\n' + availability + ' ' + rows[i].title + '\nAuthor: ' + rows[i].author + '\nCategory: ' + rows[i].category;
 							}
 
@@ -696,7 +665,7 @@ function searchBooksByAuthor(db, req, res) {
 							return (0, _context5.t0)(_context5.t1, _context5.t2, true);
 
 						case 14:
-							return _context5.abrupt('return', res.json({ fulfillmentText: 'Here are the books ����' }));
+							return _context5.abrupt('return', res.json({ fulfillmentText: 'Here are the books 😁' }));
 
 						case 15:
 						case 'end':
@@ -731,7 +700,7 @@ function searchBooksByCategory(db, req, res) {
 							}
 
 							console.log(err);
-							return _context6.abrupt('return', res.json({ fulfillmentText: 'Hmm. I might have misunderstood that ���� Please say it more properly ����' }));
+							return _context6.abrupt('return', res.json({ fulfillmentText: 'Hmm. I might have misunderstood that 👾 Please say it more properly 😁' }));
 
 						case 3:
 							if (rows.length) {
@@ -739,13 +708,13 @@ function searchBooksByCategory(db, req, res) {
 								break;
 							}
 
-							return _context6.abrupt('return', res.json({ fulfillmentText: 'That book is nowhere to be found �������������' }));
+							return _context6.abrupt('return', res.json({ fulfillmentText: 'That book is nowhere to be found 🤷‍♀️' }));
 
 						case 5:
-							books = 'Here are the books:\n��� Available ���� Taken';
+							books = 'Here are the books:\n✅ Available 🚫 Taken';
 
 							for (i = 0; i < rows.length; i++) {
-								availability = rows[i].borrower ? '����' : '���';
+								availability = rows[i].borrower ? '🚫' : '✅';
 								books += '\n\n' + availability + ' ' + rows[i].title + '\nAuthor: ' + rows[i].author + '\nCategory: ' + rows[i].category;
 							}
 
@@ -760,7 +729,7 @@ function searchBooksByCategory(db, req, res) {
 							return (0, _context6.t0)(_context6.t1, _context6.t2, true);
 
 						case 14:
-							return _context6.abrupt('return', res.json({ fulfillmentText: 'Here are the books ����' }));
+							return _context6.abrupt('return', res.json({ fulfillmentText: 'Here are the books 😁' }));
 
 						case 15:
 						case 'end':
@@ -795,7 +764,7 @@ function searchBooksByTitle(db, req, res) {
 							}
 
 							console.log(err);
-							return _context7.abrupt('return', res.json({ fulfillmentText: 'Hmm. I might have misunderstood that ���� Please say it more properly ����' }));
+							return _context7.abrupt('return', res.json({ fulfillmentText: 'Hmm. I might have misunderstood that 👾 Please say it more properly 😁' }));
 
 						case 3:
 							if (rows.length) {
@@ -803,13 +772,13 @@ function searchBooksByTitle(db, req, res) {
 								break;
 							}
 
-							return _context7.abrupt('return', res.json({ fulfillmentText: 'That book is nowhere to be found �������������' }));
+							return _context7.abrupt('return', res.json({ fulfillmentText: 'That book is nowhere to be found 🤷‍♀️' }));
 
 						case 5:
-							books = 'Here are the books:\n��� Available ���� Taken';
+							books = 'Here are the books:\n✅ Available 🚫 Taken';
 
 							for (i = 0; i < rows.length; i++) {
-								availability = rows[i].borrower ? '����' : '���';
+								availability = rows[i].borrower ? '🚫' : '✅';
 								books += '\n\n' + availability + ' ' + rows[i].title + '\nAuthor: ' + rows[i].author + '\nCategory: ' + rows[i].category;
 							}
 
@@ -824,7 +793,7 @@ function searchBooksByTitle(db, req, res) {
 							return (0, _context7.t0)(_context7.t1, _context7.t2, true);
 
 						case 14:
-							return _context7.abrupt('return', res.json({ fulfillmentText: 'Here are the books ����' }));
+							return _context7.abrupt('return', res.json({ fulfillmentText: 'Here are the books 😁' }));
 
 						case 15:
 						case 'end':
@@ -858,7 +827,7 @@ function showAllBooks(db, req, res) {
 							}
 
 							console.log(err);
-							return _context8.abrupt('return', res.json({ fulfillmentText: 'Hmm. I might have misunderstood that ���� Please say it more properly ����' }));
+							return _context8.abrupt('return', res.json({ fulfillmentText: 'Hmm. I might have misunderstood that 👾 Please say it more properly 😁' }));
 
 						case 3:
 							if (rows.length) {
@@ -866,13 +835,13 @@ function showAllBooks(db, req, res) {
 								break;
 							}
 
-							return _context8.abrupt('return', res.json({ fulfillmentText: 'There are currently no books ����������' }));
+							return _context8.abrupt('return', res.json({ fulfillmentText: 'There are currently no books 🤷‍️' }));
 
 						case 5:
-							books = 'Here are the books:\n��� Available ���� Taken';
+							books = 'Here are the books:\n✅ Available 🚫 Taken';
 
 							for (i = 0; i < rows.length; i++) {
-								availability = rows[i].borrower ? '����' : '���';
+								availability = rows[i].borrower ? '🚫' : '✅';
 								books += '\n\n' + availability + ' ' + rows[i].title + '\nAuthor: ' + rows[i].author + '\nCategory: ' + rows[i].category;
 							}
 
@@ -887,7 +856,7 @@ function showAllBooks(db, req, res) {
 							return (0, _context8.t0)(_context8.t1, _context8.t2, true);
 
 						case 14:
-							return _context8.abrupt('return', res.json({ fulfillmentText: 'Here are all the books ����' }));
+							return _context8.abrupt('return', res.json({ fulfillmentText: 'Here are all the books 😁' }));
 
 						case 15:
 						case 'end':
@@ -921,7 +890,7 @@ function showAllAvailableBooks(db, req, res) {
 							}
 
 							console.log(err);
-							return _context9.abrupt('return', res.json({ fulfillmentText: 'Hmm. I might have misunderstood that ���� Please say it more properly ����' }));
+							return _context9.abrupt('return', res.json({ fulfillmentText: 'Hmm. I might have misunderstood that 👾 Please say it more properly 😁' }));
 
 						case 3:
 							if (rows.length) {
@@ -929,7 +898,7 @@ function showAllAvailableBooks(db, req, res) {
 								break;
 							}
 
-							return _context9.abrupt('return', res.json({ fulfillmentText: 'There are currently no available books ����������' }));
+							return _context9.abrupt('return', res.json({ fulfillmentText: 'There are currently no available books 🤷‍️' }));
 
 						case 5:
 							books = 'Here are the available books:';
@@ -949,7 +918,7 @@ function showAllAvailableBooks(db, req, res) {
 							return (0, _context9.t0)(_context9.t1, _context9.t2);
 
 						case 14:
-							return _context9.abrupt('return', res.json({ fulfillmentText: 'Here are the available books ����' }));
+							return _context9.abrupt('return', res.json({ fulfillmentText: 'Here are the available books 😁' }));
 
 						case 15:
 						case 'end':
@@ -963,5 +932,22 @@ function showAllAvailableBooks(db, req, res) {
 			return _ref11.apply(this, arguments);
 		};
 	}());
+}
+
+function getStarted(db, req, res) {
+	var ID = req.body.originalDetectIntentRequest.payload.data.sender.id;
+	var name = req.body.queryResult.parameters.givenname;
+	var values = [ID, name + '', name + ''];
+
+	var queryString = 'INSERT INTO user(id, name) VALUES(?, ?) ON DUPLICATE KEY UPDATE name = ?;';
+	db.query(queryString, values, function (err, rows) {
+		if (err) {
+
+			console.log(err);
+			return res.json({ fulfillmentText: 'An internal error has occured. I\'m deeply sorry about this' });
+		}
+
+		return res.json({ "fulfillmentText": 'Wow. Nice to meet you! ' + name });
+	});
 }
 //# sourceMappingURL=library.js.map

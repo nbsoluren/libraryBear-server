@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 
 function pushNotif(id, payload) {
 	const url = 'https://graph.facebook.com/v2.6/me/messages?access_token=';
-	const pageAccessToken = 'EAALqslE8is4BAGSVjDTN5oCfT5aNlcgmQIbKOZALeLHUC9Ldc5aDZARu5jRMZBhwj5WnPzuFxL8BzTlsjKLZC90FLzYmXgbnhDo5i1Gr8X9ubIMdBSAD1wSIMwRBhSrxHYSrMLyz9rYi4mffoQAQO4eZBBCv9oL7zItyLjiIfIAZDZD'
+	const pageAccessToken = 'EAAdaLXIFrz8BAGIEoSrTE95KQuYZAXKdOKGZCSQgPFNt0UE3GX31ZBK5NZAnyRZA0r3f576b4NOtFcZBBZCzJWOZBlZANeb6iv1q5ZB7A9Txl1DRYHqZBZCZAykElP6DhXktH0SQu5opFtmo6FKz6PBZAAebub40oMB4NOUXvME2UcQEuTolOEJUdQSs2z'
 	
 	fetch(url + pageAccessToken, {
 		headers: { 'Content-Type': 'application/json' },
@@ -228,7 +228,7 @@ export function checkUser(db, req, res) {
 				return reject();
 			} else {
 				if(!rows.length) {
-					queryString = 'INSERT INTO user VALUES (?, ?, NOW())';
+					queryString = 'INSERT INTO user(id,source,prev_transac) VALUES (?, ?, NOW())';
 					const values = [id, source];
 
 					db.query(queryString, values, (err, rows) => {
@@ -538,4 +538,22 @@ export async function showBorrowedBooks(db, req, res) {
 		
 		return res.json({ fulfillmentText: 'Here are your borrowed books 😁' });
 	});
+}
+
+export function getStarted(db, req, res) {
+	const ID = req.body.originalDetectIntentRequest.payload.data.sender.id;
+	const name = req.body.queryResult.parameters.givenname;
+	const values = [ID,name+'',name+''];
+
+
+	const queryString = 'INSERT INTO user(id, name) VALUES(?, ?) ON DUPLICATE KEY UPDATE name = ?;';
+		db.query(queryString, values, (err, rows) => {
+			if(err) {
+		
+				console.log(err);
+				return res.json({ fulfillmentText: 'An internal error has occured. I\'m deeply sorry about this' });
+			}
+			
+			return res.json({ "fulfillmentText": 'Wow. Nice to meet you! '+name});
+		});
 }
