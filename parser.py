@@ -13,6 +13,6 @@ with open('dataset.csv', 'r') as csvfile:
 f.write("use LibraryBear;\n")
 for line in data:
     values = line
-    f.write("insert into book (image,title,author,category,userId) values (" +'"' +values[2]+ '"' + "," + '"' +values[3].replace('"','\\"')+ '"' + "," + '"' + values[4]+'"'+","+'"'+values[6].rstrip()+'"'+',NULL'+');\n')
+    f.write("insert into book (image,title,author,category,borrower) values (" +'"' +values[2]+ '"' + "," + '"' +values[3].replace('"','\\"')+ '"' + "," + '"' + values[4]+'"'+","+'"'+values[6].rstrip()+'"'+',NULL'+');\n')
 
 f.close()

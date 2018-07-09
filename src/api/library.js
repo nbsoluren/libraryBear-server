@@ -256,6 +256,85 @@ export function checkUser(db, req, res) {
 	});
 }
 
+// export function notifyUserReturnBook(db, req, res) {
+// 	const params = req.body.queryResult.outputContexts[0].parameters;
+// 	const notification = 'Another person wants to borrow the book ' + params.bookTitle + ', please return it immediately after use 📖\n\nThank you! 😁';
+// 	pushQuickReplies(params.id, notification, ['Return ' + params.bookTitle]);
+// 	return res.json({ fulfillmentText: 'The borrower has now been notified 🔔😁' });
+// }
+
+export function borrowBook(db, req, res) {
+	const params = req.body.queryResult.parameters;
+	var queryString = 'SELECT * FROM book WHERE title RLIKE ? ORDER BY title LIMIT 1';
+
+	db.query(queryString, '[[:<:]]' + params.title.replace('(', '\\(') + '[[:>:]]', async (err, rows) => {
+		if(err) {
+			console.log(err);
+			return res.json({ fulfillmentText: 'We will get back to you on this.' });
+		}
+
+		if(!rows.length) {
+			return res.json({ fulfillmentText: 'Sorry we currently dont have that book in the library. 😖' });
+		}
+
+		if(rows[0].borrower) {
+				return res.json({ fulfillmentText: 'Someone is currently borrowing that book, Sorry 😰' });
+		} else {
+
+			queryString = 'UPDATE book SET borrower = ? WHERE title RLIKE ? ORDER BY title LIMIT 1';
+			const data = await getIdSource(req);
+			const values = [data[0], '[[:<:]]' + params.title.replace('(', '\\(') + '[[:>:]]'];
+
+			db.query(queryString, values, (err, rows1) => {
+				if(err) {
+					console.log(err);
+					return res.json({ fulfillmentText: 'We will get back to you on this.'  });
+				}
+			
+				
+				return res.json(createFulfillmentCardSuggestions({
+					text: 'You\'ve succesfully borrowed a book!',
+					imageUri: rows[0].image,
+					title: rows[0].title + ' by ' + rows[0].author,
+					subtitle: rows[0].category,
+					suggestions: ['Borrow another book', 'Return ' + rows[0].title]
+				}));
+			});
+		}
+	});
+}
+
+export async function returnBook(db, req, res) {
+	const params = req.body.queryResult.parameters;
+	var queryString = 'SELECT id, title FROM book WHERE title RLIKE ? AND borrower = ? ORDER BY title LIMIT 1';
+	const values = ['[[:<:]]' + params.title.replace('(', '\\(') + '[[:>:]]', (await getIdSource(req))[0]];
+
+	db.query(queryString, values, (err, rows) => {
+		if(err) {
+			console.log(err);
+			return res.json({ fulfillmentText: 'We will get back to you on this.' });
+		}
+
+		if(!rows.length) {
+			return res.json({ fulfillmentText: 'You can\'t return a book you didn\'t borrow. 😡' });
+		}
+
+		queryString = 'UPDATE book SET borrower = null WHERE id = ? ORDER BY title LIMIT 1';
+		
+		db.query(queryString, rows[0].id, (err, rows1) => {
+			if(err) {
+				console.log(err);
+				return res.json({ fulfillmentText: 'Internal Error, We will get back to you on this.' });
+			}
+
+			return res.json(createFulfillmentSuggestions({
+				text: 'Succesfully returned' + rows[0].title + '. 🤗',
+				suggestions: ['Borrow another book', 'Show borrowed books']
+			}));
+		});
+	});
+}
+
 export function searchBooks(db, req, res) {
 	const params = req.body.queryResult.parameters;
 	const hasTitle = params.title != '';
@@ -332,7 +411,6 @@ export function searchBooksByAuthor(db, req, res) {
 	});
 }
 
-
 export function searchBooksByCategory(db, req, res) {
 	const category = req.body.queryResult.parameters.category;
 	const queryString = 'SELECT * FROM book WHERE category RLIKE ? ORDER BY title';
@@ -359,7 +437,6 @@ export function searchBooksByCategory(db, req, res) {
 		return res.json({ fulfillmentText: 'Here are the books 😁' });
 	});
 }
-
 
 export function searchBooksByTitle(db, req, res) {
 	const title = req.body.queryResult.parameters.title;
