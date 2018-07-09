@@ -3,9 +3,9 @@ import { Router } from 'express';
 import facets from './facets';
 import * as library from './library';
 import * as extras from './extras';
-import * as weather from './weather';
-import * as worldTime from './world_time';
-import * as ytsList from './yts_list';
+// import * as weather from './weather';
+// import * as worldTime from './world_time';
+// import * as ytsList from './yts_list';
 
 export default ({ config, db }) => {
 	let api = Router();
@@ -27,6 +27,11 @@ export default ({ config, db }) => {
 					return library.searchBooksByCategory(db, req, res);
 				case 'show-all-books':
 					return library.showAllBooks(db, req, res);
+				case 'show-all-available-books':
+					return library.showAllAvailableBooks(db, req, res);
+				case 'show-borrowed-books':
+					return library.showBorrowedBooks(db, req, res);
+				
 
 				default:
 					return res.json({ fulfillmentText: 'There is an error 👾' });

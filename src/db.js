@@ -4,25 +4,22 @@ export default callback => {
 	const db = mysql.createConnection({
 		host: 'localhost',
 		user: 'root',
-		password: 'Amazing!',
-		db: 'tay_bot'
+		password: 'root',
+		db: 'libraryBear'
 	});
 
-	db.on('ready', () => console.log('Database is connected')).on('error', err => {
-		console.log('Error in connecting to database');
-		console.log(err.message);
-	});
 
 	db.connect(err => {
 		if (err) {
 			console.log('Error in connecting to database');
 			console.log(err.message);
 		} else {
-			console.log('Success in connecting to database');
+			console.log('Successfully connected to database');
 		}
 	});
 
-	db.query('USE tay_bot');
+	db.query('USE LibraryBear');
+
 
 	callback(db);
 }
