@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
-exports.showBorrowedBooks = exports.returnBook = undefined;
+exports.getStarted = exports.showBorrowedBooks = exports.returnBook = undefined;
 
 var returnBook = exports.returnBook = function () {
 	var _ref5 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(db, req, res) {
@@ -147,6 +147,47 @@ var showBorrowedBooks = exports.showBorrowedBooks = function () {
 	};
 }();
 
+var getStarted = exports.getStarted = function () {
+	var _ref14 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee12(db, req, res) {
+		var array, ID, source, name, values, queryString;
+		return regeneratorRuntime.wrap(function _callee12$(_context12) {
+			while (1) {
+				switch (_context12.prev = _context12.next) {
+					case 0:
+						_context12.next = 2;
+						return getIdSource(req);
+
+					case 2:
+						array = _context12.sent;
+						ID = array[0];
+						source = array[1];
+						name = req.body.queryResult.parameters.givenname;
+						values = [ID, name + '', source, name + ''];
+						queryString = 'INSERT INTO user(id, name, source, prev_transac) VALUES(?, ?, ?, NOW()) ON DUPLICATE KEY UPDATE name = ?;';
+
+						db.query(queryString, values, function (err, rows) {
+							if (err) {
+
+								console.log(err);
+								return res.json({ fulfillmentText: 'An internal error has occured. I\'m deeply sorry about this' });
+							}
+
+							return res.json({ "fulfillmentText": 'Wow. Nice to meet you! ' + name });
+						});
+
+					case 9:
+					case 'end':
+						return _context12.stop();
+				}
+			}
+		}, _callee12, this);
+	}));
+
+	return function getStarted(_x26, _x27, _x28) {
+		return _ref14.apply(this, arguments);
+	};
+}();
+
 exports.checkUser = checkUser;
 exports.borrowBook = borrowBook;
 exports.searchBooks = searchBooks;
@@ -155,7 +196,6 @@ exports.searchBooksByCategory = searchBooksByCategory;
 exports.searchBooksByTitle = searchBooksByTitle;
 exports.showAllBooks = showAllBooks;
 exports.showAllAvailableBooks = showAllAvailableBooks;
-exports.getStarted = getStarted;
 
 var _nodeFetch = require('node-fetch');
 
@@ -932,22 +972,5 @@ function showAllAvailableBooks(db, req, res) {
 			return _ref11.apply(this, arguments);
 		};
 	}());
-}
-
-function getStarted(db, req, res) {
-	var ID = req.body.originalDetectIntentRequest.payload.data.sender.id;
-	var name = req.body.queryResult.parameters.givenname;
-	var values = [ID, name + '', name + ''];
-
-	var queryString = 'INSERT INTO user(id, name) VALUES(?, ?) ON DUPLICATE KEY UPDATE name = ?;';
-	db.query(queryString, values, function (err, rows) {
-		if (err) {
-
-			console.log(err);
-			return res.json({ fulfillmentText: 'An internal error has occured. I\'m deeply sorry about this' });
-		}
-
-		return res.json({ "fulfillmentText": 'Wow. Nice to meet you! ' + name });
-	});
 }
 //# sourceMappingURL=library.js.map

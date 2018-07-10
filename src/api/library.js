@@ -540,13 +540,15 @@ export async function showBorrowedBooks(db, req, res) {
 	});
 }
 
-export function getStarted(db, req, res) {
-	const ID = req.body.originalDetectIntentRequest.payload.data.sender.id;
+export async function getStarted(db, req, res) {
+	const array = await getIdSource(req);
+	const ID = array[0];
+	const source = array[1];
 	const name = req.body.queryResult.parameters.givenname;
-	const values = [ID,name+'',name+''];
+	const values = [ID,name+'',source,name+''];
 
 
-	const queryString = 'INSERT INTO user(id, name) VALUES(?, ?) ON DUPLICATE KEY UPDATE name = ?;';
+	const queryString = 'INSERT INTO user(id, name, source, prev_transac) VALUES(?, ?, ?, NOW()) ON DUPLICATE KEY UPDATE name = ?;';
 		db.query(queryString, values, (err, rows) => {
 			if(err) {
 		
