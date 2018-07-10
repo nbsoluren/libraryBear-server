@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 
 function pushNotif(id, payload) {
 	const url = 'https://graph.facebook.com/v2.6/me/messages?access_token=';
-	const pageAccessToken = 'EAAdaLXIFrz8BAGIEoSrTE95KQuYZAXKdOKGZCSQgPFNt0UE3GX31ZBK5NZAnyRZA0r3f576b4NOtFcZBBZCzJWOZBlZANeb6iv1q5ZB7A9Txl1DRYHqZBZCZAykElP6DhXktH0SQu5opFtmo6FKz6PBZAAebub40oMB4NOUXvME2UcQEuTolOEJUdQSs2z'
+	const pageAccessToken = 'EAAdaLXIFrz8BAI5jbBbAfBrV03Yl6TnFsvpqKsvfVdUZAkGO93ZCv0YRHfVrUAu1cd1vkK3J6fJNKnjYZByZAQsSC2y7hgXCfHuPxoDMqZCkNlpCpwGMAOA2UeDvkzyxxUhbPyyrSeTx9fiZCRBfP0bI0rRA1bTEWfAhqZB4uMPeM03ZAnSF5QkA'
 	
 	fetch(url + pageAccessToken, {
 		headers: { 'Content-Type': 'application/json' },
