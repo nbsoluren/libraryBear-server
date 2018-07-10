@@ -8,6 +8,7 @@
     "build": "babel src -s -D -d dist --presets es2015,stage-0",
     "start": "node dist",
     "seed": "cat ./src/schema.sql | mysql -u root -p",
+    "populate": "mysql -u root -p --silent < ./src/seed.sql",
     "prestart": "npm run -s build",
     "test": "eslint src"
   },
