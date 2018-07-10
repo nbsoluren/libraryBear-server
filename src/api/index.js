@@ -8,6 +8,7 @@ import * as extras from './extras';
 import * as weather from './weather';
 import * as worldTime from './world_time';
 import * as ytsList from './yts_list';
+import * as functions from './functions';
 
 export default ({ config, db }) => {
 	let api = Router();
