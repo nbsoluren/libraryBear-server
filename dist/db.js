@@ -14,7 +14,7 @@ exports.default = function (callback) {
 	var db = _mysql2.default.createConnection({
 		host: 'localhost',
 		user: 'root',
-		password: 'root',
+		password: 'Amazing!',
 		db: 'libraryBear'
 	});
 
