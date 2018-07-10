@@ -20,8 +20,8 @@ CREATE TABLE book (
   title text NOT NULL,
   author text NOT NULL,
   category text NOT NULL,
-  borrower varchar(256) DEFAULT NULL,
   image text NOT NULL,
+  borrower varchar(256) DEFAULT NULL,
   PRIMARY KEY (id),
   KEY FK_borrower (borrower),
   CONSTRAINT FK_borrower FOREIGN KEY (borrower) REFERENCES user (id) ON DELETE SET NULL ON UPDATE CASCADE
